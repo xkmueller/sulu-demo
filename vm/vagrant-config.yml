@@ -47,7 +47,7 @@ vagrant-config:
       ioapic: 'on'
       natdnsproxy1: 'on'
     # box name
-    name: 'sulo_local'
+    name: 'sulu_local'
   ansible:
     playbooks:
       - 'ansible/playbook.yml'
