@@ -1,0 +1,39 @@
+#PHP Base Settings
+php_version: "7.1"
+
+php_memory_limit: "1024M"
+php_max_execution_time: "30"
+php_upload_max_filesize: "6M"
+
+#PHP Modules
+php_install_recommends: no
+php_packages_extra:
+  - libpcre3-dev
+  - php-apcu
+  - php{{ php_version }}-curl
+  - php{{ php_version }}-fileinfo
+  - php{{ php_version }}-gettext
+  - php{{ php_version }}-imap
+  - php{{ php_version }}-intl
+  - php{{ php_version }}-json
+  - php{{ php_version }}-mcrypt
+  - php{{ php_version }}-mysql
+  - php{{ php_version }}-mysqli
+  - php{{ php_version }}-readline
+  - php{{ php_version }}-shmop
+  - php{{ php_version }}-soap
+  - php{{ php_version }}-sockets
+  - php{{ php_version }}-tokenizer
+  - php{{ php_version }}-xmlreader
+  - php{{ php_version }}-xmlrpc
+  - php{{ php_version }}-xmlwriter
+  - php{{ php_version }}-xsl
+
+#PHP FPM
+php_enable_php_fpm: true
+php_fpm_listen: "/run/php/php{{ php_version }}-fpm.sock"
+php_fpm_listen_allowed_clients: "127.0.0.1"
+#PHP APC
+php_enable_apc: true
+php_apc_shm_size: "96M"
+php_apc_enable_cli: "0"

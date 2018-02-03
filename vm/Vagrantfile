@@ -1,0 +1,166 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+require 'yaml'
+
+# check if config file exists and if not raise an error
+dir = File.dirname(File.expand_path(__FILE__))
+if !File.file?("#{dir}/vagrant-config.yml")
+  raise "Vagrant: config not found in working directory (" + dir + "), can not start VM without configuration.\n"
+end
+
+# load configuration for this machine
+print "Vagrant: Loading Configuration from YAML File. \n"
+conf    = YAML.load_file("#{dir}/vagrant-config.yml")
+plugin_conf = conf['vagrant-config']['required_plugins']
+vm_conf = conf['vagrant-config']['vm']
+ans_conf = conf['vagrant-config']['ansible']
+
+# Determine operating system of host machine
+module OS
+    def OS.windows?
+        (/cygwin|mswin|mingw|bccwin|wince|emx/ =~ RUBY_PLATFORM) != nil
+    end
+
+    def OS.mac?
+        (/darwin/ =~ RUBY_PLATFORM) != nil
+    end
+
+    def OS.unix?
+        !OS.windows?
+    end
+
+    def OS.linux?
+        OS.unix? and not OS.mac?
+    end
+end
+
+# required plugins for this vagrant machine
+required_plugins = Array.new
+
+# windows hosts need winnfsd to support NFS file mount
+if OS.windows? and plugin_conf['windows'].length > 0
+    print "Vagrant: Detected Windows OS\n"
+    required_plugins.concat(plugin_conf['windows'])
+end
+
+# windows hosts need winnfsd to support NFS file mount
+if OS.mac? and plugin_conf['mac'].length > 0
+    print "Vagrant: Detected Mac OS\n"
+    required_plugins.concat(plugin_conf['mac'])
+end
+
+# windows hosts need winnfsd to support NFS file mount
+if OS.linux? and plugin_conf['linux'].length > 0
+    print "Vagrant: Detected Linux OS\n"
+    required_plugins.concat(plugin_conf['linux'])
+end
+
+# windows hosts need winnfsd to support NFS file mount
+if OS.unix? and plugin_conf['unix'].length > 0
+    print "Vagrant: Detected Unix OS\n"
+    required_plugins.concat(plugin_conf['unix'])
+end
+
+# check if all needed plugins are installed
+errors = []
+required_plugins.each do |plugin|
+  if not Vagrant.has_plugin?(plugin)
+    errors.push("#{plugin} is required. Please run `vagrant plugin install #{plugin}`")
+    # Auto install, commented due to the respect of other ppls machines, but an option for the future maybe via prompt?
+    # exec "vagrant plugin install #{plugin}" unless Vagrant.has_plugin? plugin
+  end
+end
+
+# stop virtual machine setup if plugins are missing
+if errors.length > 0
+    errors.push(File.read('./hint.txt'))
+    raise "\n\nPlugins Missing:\n\nOne or more Plugins that are required to run this Vagrant configuration are missing:\n\n" + errors.join("\n") + "\n\n"
+end
+
+# start VM configuration
+Vagrant.require_version "#{conf['vagrant-config']['require_config_version']}"
+Vagrant.configure("2") do |config|
+
+    # general settings for the VM
+    config.vm.box = "#{vm_conf['box']}"
+    config.vm.network :private_network, ip: "#{vm_conf['network']['ip']}"
+    config.vm.hostname = "#{vm_conf['hostname']}"
+    config.vm.post_up_message = "Vagrant: Virtual Machine successfully booted and ready for use."
+    config.vm.define :"#{vm_conf['name']}"
+
+    # synched folders
+    vm_conf['synced_folders'].each do |i, folder|
+      config.vm.synced_folder "#{folder['src']}", "#{folder['nfs']['bind_folder']}",
+      nfs: true,
+      # rw = allow read/write access to the mount
+      # actimeo=1 = reduce the attribute caching of NFS to 1 second
+      # this is done to be able to use tools like grunt/gulp etc. properly
+      # the parameter 'noac' is not used because it can cause serious performance issues
+      mount_options: ['rw', 'actimeo=1'],
+      # we use NFS version 3 and TCP because the NFS server software for windows
+      # does not support UDP and any other version than NFS3
+      nfs_version: 3,
+      nfs_udp: false,
+      # some recommended linux file mount options
+      linux__nfs_options: ['rw','no_subtree_check','all_squash']
+    end
+
+    # configure bindfs plugin
+    if Vagrant.has_plugin?("vagrant-bindfs")
+        vm_conf['synced_folders'].each do |i, folder|
+            config.bindfs.bind_folder   "#{folder['nfs']['bind_folder']}",
+                                        "#{folder['dst']}",
+                                        :'noacl' => false,
+                                        :owner => "#{folder['nfs']['owner']}",
+                                        :group => "#{folder['nfs']['group']}",
+                                        :'create-as-user' => folder['nfs']['create_as_user'],
+                                        :perms => "#{folder['nfs']['perms']}",
+                                        :'create-with-perms' => "#{folder['nfs']['create_with_perms']}",
+                                        :'chown-normal' => folder['nfs']['chown_ignore'],
+                                        :'chgrp-normal' => folder['nfs']['chgrp_ignore'],
+                                        :'chmod-normal' => folder['nfs']['chmod_ignore']
+        end
+    end
+
+    # hostmanager helps connecting the host with the guest to be able to access it through a domain name
+    # domains should always end with the tld ".local" as long as this domain is not publicly available
+    # the usage of manage_host requires elevated rights for manipulating the hosts-file of the host-machine
+    if Vagrant.has_plugin?("vagrant-hostmanager")
+        # if this file exists in the filesystem, the hostmanager will be used
+        if File.file?("#{dir}/USE_HOSTMANAGER")
+            print "Vagrant: host manager plugin found, loading settings\n"
+            config.hostmanager.enabled = vm_conf['hostmanager']['enabled']
+            config.hostmanager.manage_host = vm_conf['hostmanager']['manage_host']
+            config.hostmanager.manage_guest = vm_conf['hostmanager']['manage_guest']
+        end
+    else
+        print "Vagrant: host manager plugin not found, if you like to let Vagrant manage the Hosts, its recommended to install it via\n`vagrant plugin install vagrant-hostmanager`\n"
+    end
+
+    # configure virtual box, so the VM will have the appropriate name and ressources
+    print "Vagrant: configuring virtualbox\n"
+    config.vm.provider :virtualbox do |vb|
+        vb.name = "#{vm_conf['name']}";
+        vb.customize ["modifyvm", :id, "--cpus", "#{vm_conf['v_box_setup']['cpus']}"]
+        vb.customize ["modifyvm", :id, "--ioapic", "#{vm_conf['v_box_setup']['ioapic']}"]
+        vb.customize ["modifyvm", :id, "--memory", "#{vm_conf['v_box_setup']['memory']}"]
+        vb.customize ["modifyvm", :id, "--natdnsproxy1", "#{vm_conf['v_box_setup']['natdnsproxy1']}"]
+    end
+
+    ans_conf['playbooks'].each do |playbook|
+        # set ansible as provisioner and set some global properties for ansible
+        print "Vagrant: reading ansible configuration for playbook #{playbook}\n"
+        config.vm.provision "ansible_local" do |ansible|
+            ansible.playbook = "#{playbook}"
+            # this checks if ansible already loaded the roles from galaxy
+            # if yes, it will not load them again, this is rather a hack than a fix
+            # for the problem, that ansible will redownload all roles from galaxy, even if they already exist
+            ansible.galaxy_role_file = ans_conf['galaxy_role_file']
+            ansible.galaxy_roles_path = ans_conf['galaxy_roles_path']
+            ansible.extra_vars = {
+              app_host: ans_conf['extra_vars']['app_host']
+            }
+        end
+    end
+end

@@ -1,0 +1,57 @@
+---
+vagrant-config:
+  # plugins required to setup this VM
+  required_plugins:
+    general:
+      - 'vagrant-bindfs'
+    windows:
+      - 'vagrant-winnfsd'
+    mac: { }
+    linux: { }
+    unix: { }
+  # vm configuration
+  require_config_version: '>= 1.8.0'
+  vm:
+    # what box to use
+    box: bento/ubuntu-16.04
+    box_url: bento/ubuntu-16.04
+    # network settings
+    hostname: 'sulo.local'
+    network:
+      ip: '192.168.33.111'
+      forwarded_ports: { }
+    hostmanager:
+      enabled: true
+      manage_host: true
+      manage_guest: true
+    # synched folders
+    synced_folders:
+      web_root:
+        src: '../htdocs'
+        dst: '/var/www/vhosts/sulo'
+        # nfs settings
+        nfs:
+          bind_folder: "/vagrant-nfs"
+          owner: "www-data"
+          group: "vagrant"
+          create_as_user: true
+          perms: "u=rwX:g=rwX:o="
+          create_with_perms: "u=rwX:g=rwX:o="
+          chown_ignore: false
+          chgrp_ignore: false
+          chmod_ignore: false
+    # box physical ressources
+    v_box_setup:
+      memory: '4096'
+      cpus: '4'
+      ioapic: 'on'
+      natdnsproxy1: 'on'
+    # box name
+    name: 'sulo_local'
+  ansible:
+    playbooks:
+      - 'ansible/playbook.yml'
+    galaxy_role_file: 'ansible/provisioning/requirements.yml'
+    galaxy_roles_path: 'ansible/roles-galaxy'
+    extra_vars:
+      app_host: '192.168.33.111'
