@@ -19,6 +19,15 @@
 /app/config/parameters.yml
 /app/config/parameters.ini
 
+# Vagrant/Ansible
+/vm/ansible/roles-galaxy/
+/vm/ansible/dumps/*
+/vm/ansible/files/*
+/vm/ansible/resources/*
+/vm/.vagrant/
+/vm/ansible/playbook.retry
+/vm/USE_HOSTMANAGER
+
 # Managed by Composer
 /app/bootstrap.php.cache
 /var/bootstrap.php.cache
