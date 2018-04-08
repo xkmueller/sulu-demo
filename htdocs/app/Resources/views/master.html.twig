@@ -7,7 +7,9 @@
 
         {% block meta %}{% endblock %}
 
-        {% block style %}{% endblock %}
+        {% block style %}
+        <link rel="stylesheet" href="{{ asset('src/AppBundle/dist/styles.min.css') }}">
+        {% endblock %}
     </head>
     <body>
         <header>
