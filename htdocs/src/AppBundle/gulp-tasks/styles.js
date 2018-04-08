@@ -16,5 +16,5 @@ gulp.task('styles', function() {
       .pipe(sourcemaps.write())
       .pipe(rename('styles.min.css'))
       .pipe(autoprefixer())
-      .pipe(gulp.dest('./dist/'))
+      .pipe(gulp.dest('../../web/bundles/'));
 });

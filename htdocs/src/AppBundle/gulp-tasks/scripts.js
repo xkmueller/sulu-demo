@@ -22,5 +22,5 @@ gulp.task('scripts', function() {
     gulp.src(files)
         .pipe(concat('scripts.min.js'))
         .pipe(uglify(uglifyConfig))
-        .pipe(gulp.dest('./dist/'));
+        .pipe(gulp.dest('../../web/bundles/'));
 });
