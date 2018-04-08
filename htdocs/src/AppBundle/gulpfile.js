@@ -24,5 +24,5 @@ gulp.task('watch', function() {
 /**
  * run on first gulp call the build and then watch task
  */
-gulp.task('build', ['styles', 'scripts']);
+gulp.task('build', ['styles', 'scripts', 'copy-bootstrap-grid']);
 gulp.task('default', ['build','watch']);
