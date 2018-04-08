@@ -5,7 +5,7 @@
 .DS_Store
 
 # Frontend
-/src/AppBundle/node_modules/
+/htdocs/src/AppBundle/node_modules/
 
 # Cache and logs (Symfony2)
 /app/cache/*
