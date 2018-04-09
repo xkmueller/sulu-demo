@@ -16,11 +16,11 @@ gulp.task('scripts', function() {
     },
     files = [
         'node_modules/jquery/dist/jquery.min.js',
-        'sulu-demo/scripts/scripts.js'
+        'resources/scripts/scripts.js'
     ];
 
     gulp.src(files)
         .pipe(concat('scripts.min.js'))
         .pipe(uglify(uglifyConfig))
-        .pipe(gulp.dest('../../web/bundles/'));
+        .pipe(gulp.dest('./resources/public/js/'));
 });

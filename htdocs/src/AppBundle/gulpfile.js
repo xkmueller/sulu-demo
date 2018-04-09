@@ -10,10 +10,10 @@ requireDir('./gulp-tasks');
 gulp.task('watch', function() {
    var watchFiles = {
        'styles': [
-           './sulu-demo/styles/**/*.scss'
+           './resources/scscc/**/*.scss'
        ],
        'scripts': [
-           './sulu-demo/scripts/**/*.js'
+           './resources/scripts/**/*.js'
        ]
    }
 
@@ -25,4 +25,5 @@ gulp.task('watch', function() {
  * run on first gulp call the build and then watch task
  */
 gulp.task('build', ['styles', 'scripts', 'copy-bootstrap-grid']);
-gulp.task('default', ['build','watch']);
+gulp.task('copy', ['copy-all-to-bundles']);
+gulp.task('default', ['build','copy','watch']);
