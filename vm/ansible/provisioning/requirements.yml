@@ -1,9 +1,6 @@
 ---
-- src: geerlingguy.apache
-- src: geerlingguy.php-versions
-- src: geerlingguy.php
-- src: geerlingguy.apache-php-fpm
-- src: geerlingguy.mysql
-- src: geerlingguy.php-xdebug
-- src: viasite-ansible.zsh
-- src: staenker.timezone
+- src: fourforbusiness.basic-setup
+- src: fourforbusiness.mysql-prepare-db
+- src: fourforbusiness.dev-lamp
+- src: geerlingguy.nodejs
+- src: geerlingguy.composer

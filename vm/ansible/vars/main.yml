@@ -1,0 +1,74 @@
+---
+# --------------------------------
+# ffb.shopware role variables
+# --------------------------------
+project_environment: development
+# --------------------------------
+# mysql
+# --------------------------------
+# default initial database
+mysql_root_password: "{{ project_tag }}"
+mysql_databases:
+  - name: "{{ project_tag }}"
+    encoding: latin1
+    collation: latin1_general_ci
+mysql_users:
+  - name: "{{ project_tag }}"
+    host: "%"
+    password: "{{ project_tag }}"
+    priv: "{{ project_tag }}.*:ALL"
+# --------------------------------
+# nodejs
+# --------------------------------
+nodejs_npm_global_packages:
+  - name: grunt
+  - name: yarn
+# --------------------------------
+# ffb.sql-prepare-db variables
+# --------------------------------
+mysql_import_dumps:
+  - filename: sql_dump.sql
+    database: "{{ mysql_databases[0].name }}"
+mysql_additional_scripts:
+  - filename: reset_host_ssl.sql
+    database: "{{ mysql_databases[0].name }}"
+# --------------------------------
+# ffb.copy-project-files variables
+# --------------------------------
+project_files:
+  files:
+    - src: "files/.htaccess_{{ project_environment }}"
+      dst:
+        path: "{{ apache_vhosts[0].documentroot }}"
+        filename: .htaccess
+      mode: 755
+      force: false
+  templates:
+    - src: "templates/parameters.yml.j2"
+      dst:
+        path: "{{ apache_vhosts[0].documentroot }}/app/config"
+        filename: parameters.yml
+      mode: 755
+      force: false
+# --------------------------------
+# geerlingguy.php
+# --------------------------------
+php_version: '7.1'
+php_packages_extra:
+  - php{{ php_version }}-zip
+# --------------------------------
+# nodejs variables
+# --------------------------------
+nodejs_npm_global_packages:
+  - name: gulp
+  - name: yarn
+
+# --------------------------------
+# geerlingguy.apache
+# --------------------------------
+apache_vhosts:
+  - servername: "{{ ansible_fqdn }}"
+    srveradmin: "admin@localhost"
+    documentroot: "{{ d_root }}/web"
+    extra_parameters: |
+                  ProxyPassMatch ^/(.*\.php(/.*)?)$ "unix:/run/php/php{{ php_version }}-fpm.sock|fcgi://localhost{{ d_root }}/web"

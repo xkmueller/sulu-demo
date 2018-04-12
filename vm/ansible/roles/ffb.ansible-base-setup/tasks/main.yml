@@ -1,3 +1,0 @@
----
-- include_tasks: install-system-software.yml
-- include_tasks: generate-locales.yml

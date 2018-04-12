@@ -70,3 +70,5 @@ DirectoryIndex website.php
         # RedirectTemp cannot be used instead
     </IfModule>
 </IfModule>
+
+SetEnv SYMFONY_ENV dev

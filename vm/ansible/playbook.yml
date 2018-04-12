@@ -1,26 +1,14 @@
 ---
-- name: Setup VM
+- name: Install Sulu
   hosts: all
   become: true
-
-  vars_files:
-    # Galaxy provided Roles Variable File
-    - "vars/galaxy/apache.yml"
-    - "vars/galaxy/mysql.yml"
-    - "vars/galaxy/php.yml"
-    - "vars/galaxy/xdebug.yml"
-    - "vars/galaxy/zsh.yml"
-
-  #ORDER MATTERS!
+  pre_tasks:
+    - name: load all vars
+      include_vars:
+        dir: 'vars'
   roles:
-    # prepare VM with common tasks
-    - { role: staenker.timezone, timezone: Europe/Berlin }
-    - ffb.ansible-base-setup
-    - viasite-ansible.zsh
-    # Galaxy Managed Roles
-    - geerlingguy.apache
-    - geerlingguy.php-versions
-    - geerlingguy.php
-    - geerlingguy.apache-php-fpm
-    - geerlingguy.mysql
-    - geerlingguy.php-xdebug
+    - fourforbusiness.basic-setup
+    - geerlingguy.nodejs
+    - fourforbusiness.dev-lamp
+    - geerlingguy.composer
+    - fourforbusiness.mysql-prepare-db

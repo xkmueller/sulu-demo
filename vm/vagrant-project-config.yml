@@ -1,0 +1,10 @@
+---
+project:
+  tag: "sulu"
+guests:
+  practice:
+    box:
+      network:
+        nics:
+          default:
+            ip: '192.168.33.5'
