@@ -10,12 +10,12 @@ var gulp = require('gulp'),
  */
 gulp.task('styles', function() {
 
-    var filename = 'resources/scss/build_main.scss'
+    var filename = 'resources/scss/build_main.scss';
    gulp.src(filename)
       .pipe(sourcemaps.init())
       .pipe(sass().on('error', sass.logError))
       .pipe(sourcemaps.write())
       .pipe(rename('styles.min.css'))
       .pipe(autoprefixer())
-      .pipe(gulp.dest('./resources/public/css/'));
+      .pipe(gulp.dest('../../web/css/'));
 });

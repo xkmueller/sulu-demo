@@ -9,6 +9,6 @@ var gulp = require('gulp'),
 gulp.task('copy-bootstrap-grid', function() {
 
     gulp.src(source)
-       .pipe(gulp.dest('./resources/public/css/'));
+       .pipe(gulp.dest('../../web/css/'));
 });
 
