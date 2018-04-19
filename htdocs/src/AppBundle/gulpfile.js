@@ -10,7 +10,7 @@ requireDir('./gulp-tasks');
 gulp.task('watch', function() {
    var watchFiles = {
        'styles': [
-           './resources/scscc/**/*.scss'
+           './resources/scss/**/*.scss'
        ],
        'scripts': [
            './resources/scripts/**/*.js'
